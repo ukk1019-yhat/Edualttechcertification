@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ShieldCheck, Search, FileCheck, Users, GraduationCap, ArrowRight, Loader2 } from 'lucide-react'
+import { Search, FileCheck, Users, GraduationCap, ArrowRight, Loader2 } from 'lucide-react'
 import { certificates, certificateTypes, type Certificate } from '../data/certificates'
 
 export default function Home() {
@@ -42,9 +42,7 @@ export default function Home() {
     <div>
       <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <ShieldCheck className="w-8 h-8 text-indigo-600" />
-          </div>
+          <img src="/logo.png" alt="Edu Alt Tech" className="w-16 h-16 object-contain mx-auto mb-6" />
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
             Certificate Verification
           </h1>
