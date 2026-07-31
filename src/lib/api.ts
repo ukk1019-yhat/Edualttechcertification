@@ -63,3 +63,23 @@ export async function updateCertificateApi(id: string, cert: Certificate): Promi
 export async function deleteCertificateApi(id: string): Promise<void> {
   await request(`/api/certificates/${encodeURIComponent(id)}`, { method: 'DELETE' })
 }
+
+export async function uploadImage(file: File): Promise<{ url: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        const dataUrl = reader.result as string
+        const result = await request<{ url: string }>('/api/upload', {
+          method: 'POST',
+          body: JSON.stringify({ fileName: file.name, dataUrl }),
+        })
+        resolve(result)
+      } catch (err) {
+        reject(err)
+      }
+    }
+    reader.onerror = () => reject(new Error('Could not read file'))
+    reader.readAsDataURL(file)
+  })
+}

@@ -19,6 +19,7 @@ import {
   createCertificate,
   updateCertificateApi,
   deleteCertificateApi,
+  uploadImage,
   clearToken,
   isLoggedIn,
 } from '../lib/api'
@@ -288,6 +289,8 @@ interface CertificateFormProps {
 
 function CertificateForm({ initial, saving, onCancel, onSave }: CertificateFormProps) {
   const [cert, setCert] = useState<Certificate>(initial ? { ...initial } : { ...EMPTY_CERT })
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
 
   const update = (patch: Partial<Certificate>) => setCert((c) => ({ ...c, ...patch }))
 
@@ -363,22 +366,47 @@ function CertificateForm({ initial, saving, onCancel, onSave }: CertificateFormP
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Image URL / Path *</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Certificate Photo</label>
             <input
-              type="text"
-              required
-              value={cert.image}
-              onChange={(e) => update({ image: e.target.value })}
-              placeholder="/certificates/kavya.png"
-              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono"
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                setUploading(true)
+                setUploadError('')
+                try {
+                  const { url } = await uploadImage(file)
+                  update({ image: url })
+                } catch (err) {
+                  setUploadError((err as Error).message)
+                } finally {
+                  setUploading(false)
+                  e.target.value = ''
+                }
+              }}
+              className="w-full text-sm text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-medium file:cursor-pointer hover:file:bg-indigo-100 transition-colors"
             />
             <p className="text-xs text-slate-400 mt-1">
-              Path like /certificates/name.png or a full https:// URL to the certificate image.
+              Upload the certificate photo. You can also paste an image URL below instead.
             </p>
+            {uploadError && (
+              <p className="text-xs text-red-600 mt-1">{uploadError}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Image URL</label>
+            <input
+              type="text"
+              value={cert.image}
+              onChange={(e) => update({ image: e.target.value })}
+              placeholder="https://... or /certificates/name.png"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono"
+            />
           </div>
 
           {cert.image && (
-            <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+            <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 relative">
               <img
                 src={cert.image}
                 alt="Preview"
@@ -387,6 +415,11 @@ function CertificateForm({ initial, saving, onCancel, onSave }: CertificateFormP
                   ;(e.target as HTMLImageElement).style.display = 'none'
                 }}
               />
+              {uploading && (
+                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+                </div>
+              )}
             </div>
           )}
 
@@ -400,7 +433,7 @@ function CertificateForm({ initial, saving, onCancel, onSave }: CertificateFormP
             </button>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || uploading}
               className="flex-1 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
