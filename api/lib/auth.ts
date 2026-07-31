@@ -27,11 +27,14 @@ export function verifyToken(token: string | undefined | null): boolean {
   const a = Buffer.from(sig)
   const b = Buffer.from(expected)
   if (a.length !== b.length) return false
-  return timingSafeEqual(a, b) && email === ADMIN_EMAIL
+  return timingSafeEqual(a, b) && email.toLowerCase() === ADMIN_EMAIL.toLowerCase()
 }
 
 export function verifyCredentials(email: string, password: string): boolean {
-  return email === ADMIN_EMAIL && password === ADMIN_PASSWORD
+  return (
+    email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase() &&
+    password === ADMIN_PASSWORD
+  )
 }
 
 export function getAuthToken(req: IncomingMessage): string | undefined {
