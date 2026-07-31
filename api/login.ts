@@ -1,6 +1,6 @@
 import type { ServerResponse } from 'node:http'
 import type { IncomingMessage } from 'node:http'
-import { verifyCredentials, createToken } from './lib/auth'
+import { verifyCredentials, createToken } from './lib/auth.js'
 
 interface JsonError extends Error {
   statusCode?: number

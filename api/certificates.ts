@@ -1,8 +1,8 @@
 import type { ServerResponse } from 'node:http'
 import type { IncomingMessage } from 'node:http'
-import { isAuthorized } from './lib/auth'
-import { getCertificates, addCertificate } from './lib/db'
-import type { Certificate } from '../src/data/certificates'
+import { isAuthorized } from './lib/auth.js'
+import { getCertificates, addCertificate } from './lib/db.js'
+import type { Certificate } from '../src/data/certificates.js'
 
 function send(res: ServerResponse, statusCode: number, data: unknown) {
   res.statusCode = statusCode

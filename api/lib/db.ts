@@ -1,6 +1,6 @@
 import { Redis } from '@upstash/redis'
-import type { Certificate } from '../../src/data/certificates'
-import { certificates as seedCertificates } from '../../src/data/certificates'
+import type { Certificate } from '../../src/data/certificates.js'
+import { certificates as seedCertificates } from '../../src/data/certificates.js'
 
 const KEY = 'certificates:v1'
 
