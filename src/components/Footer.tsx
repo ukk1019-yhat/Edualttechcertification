@@ -8,6 +8,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-6 text-sm text-slate-500">
             <span>Certificate Verification System</span>
+            <a href="/admin" className="hover:text-indigo-600 transition-colors">Admin</a>
           </div>
         </div>
       </div>

@@ -1,29 +1,45 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, FileCheck, Users, GraduationCap, ArrowRight, Loader2 } from 'lucide-react'
-import { certificates, certificateTypes, type Certificate } from '../data/certificates'
+import { certificateTypes, type Certificate } from '../data/certificates'
+import { fetchCertificates } from '../lib/api'
+import { certificates as fallbackCertificates } from '../data/certificates'
 
 export default function Home() {
   const navigate = useNavigate()
   const [searchId, setSearchId] = useState('')
   const [filterType, setFilterType] = useState('all')
-  const [filteredCerts, setFilteredCerts] = useState<Certificate[]>(certificates)
+  const [allCerts, setAllCerts] = useState<Certificate[]>(fallbackCertificates)
+  const [filteredCerts, setFilteredCerts] = useState<Certificate[]>(fallbackCertificates)
   const [searching, setSearching] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let result = certificates
+    fetchCertificates()
+      .then((list) => {
+        setAllCerts(list)
+        setFilteredCerts(list)
+      })
+      .catch(() => {
+        // fall back to bundled data
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    let result = allCerts
     if (filterType !== 'all') {
       result = result.filter((c) => c.type === filterType)
     }
     setFilteredCerts(result)
-  }, [filterType])
+  }, [filterType, allCerts])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     const trimmed = searchId.trim().toUpperCase()
     if (!trimmed) return
     setSearching(true)
-    const found = certificates.find((c) => c.id.toUpperCase() === trimmed)
+    const found = allCerts.find((c) => c.id.toUpperCase() === trimmed)
     if (found) {
       navigate(`/certificate/${found.id}`)
     } else {
@@ -33,9 +49,9 @@ export default function Home() {
   }
 
   const stats = [
-    { icon: FileCheck, value: certificates.length, label: 'Certificates Issued' },
-    { icon: Users, value: certificates.filter((c) => c.type === 'employee').length, label: 'Employees' },
-    { icon: GraduationCap, value: certificates.filter((c) => c.type === 'internship').length, label: 'Interns' },
+    { icon: FileCheck, value: allCerts.length, label: 'Certificates Issued' },
+    { icon: Users, value: allCerts.filter((c) => c.type === 'employee').length, label: 'Employees' },
+    { icon: GraduationCap, value: allCerts.filter((c) => c.type === 'internship').length, label: 'Interns' },
   ]
 
   return (
@@ -107,7 +123,11 @@ export default function Home() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCerts.map((cert) => (
+            {loading ? (
+              <div className="col-span-full py-16 flex items-center justify-center text-slate-400">
+                <Loader2 className="w-6 h-6 animate-spin" />
+              </div>
+            ) : filteredCerts.map((cert) => (
               <Link
                 key={cert.id}
                 to={`/certificate/${cert.id}`}
@@ -137,11 +157,11 @@ export default function Home() {
                     View Details <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
+            </Link>
+              ))}
+            </div>
 
-          {filteredCerts.length === 0 && (
+          {!loading && filteredCerts.length === 0 && (
             <div className="text-center py-16 text-slate-500">
               <FileCheck className="w-12 h-12 mx-auto mb-3 text-slate-300" />
               <p>No certificates found for this category.</p>

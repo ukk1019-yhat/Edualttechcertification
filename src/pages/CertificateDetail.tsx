@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ShieldCheck,
@@ -9,8 +9,10 @@ import {
   User,
   Hash,
   Download,
+  Loader2,
 } from 'lucide-react'
-import { certificates } from '../data/certificates'
+import { certificates as fallbackCertificates, type Certificate } from '../data/certificates'
+import { fetchCertificates } from '../lib/api'
 import ShareModal from '../components/ShareModal'
 
 export default function CertificateDetail() {
@@ -18,8 +20,27 @@ export default function CertificateDetail() {
   const navigate = useNavigate()
   const [showShare, setShowShare] = useState(false)
   const [imgError, setImgError] = useState(false)
+  const [allCerts, setAllCerts] = useState<Certificate[]>(fallbackCertificates)
+  const [loading, setLoading] = useState(true)
 
-  const cert = certificates.find((c) => c.id === id)
+  useEffect(() => {
+    fetchCertificates()
+      .then(setAllCerts)
+      .catch(() => {
+        // fall back to bundled data
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  const cert = allCerts.find((c) => c.id === id)
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      </div>
+    )
+  }
 
   if (!cert) {
     return (
@@ -43,7 +64,7 @@ export default function CertificateDetail() {
     )
   }
 
-  const verifiedCerts = certificates.filter((c) => c.name === cert.name)
+  const verifiedCerts = allCerts.filter((c) => c.name === cert.name)
   const isEmployee = cert.type === 'employee'
 
   return (
