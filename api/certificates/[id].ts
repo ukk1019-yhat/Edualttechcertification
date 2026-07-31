@@ -35,7 +35,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           }
           const ok = await updateCertificate(id, cert)
           if (!ok) {
-            send(res, 404, { error: 'Certificate not found' })
+            send(res, 404, { error: `Certificate not found (id="${id}", url="${url}")` })
             return
           }
           send(res, 200, cert)
