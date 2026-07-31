@@ -74,22 +74,22 @@ export async function addCertificate(cert: Certificate): Promise<void> {
 
 export async function updateCertificate(id: string, cert: Certificate): Promise<boolean> {
   if (!writeClient) return true
-  const { error, count } = await writeClient
+  const { error, data } = await writeClient
     .from(TABLE)
     .update(toRow(cert))
     .eq('id', id)
-    .select('id', { count: 'exact' })
+    .select('id')
   if (error) throw error
-  return (count ?? 0) > 0
+  return (data?.length ?? 0) > 0
 }
 
 export async function deleteCertificate(id: string): Promise<boolean> {
   if (!writeClient) return true
-  const { error, count } = await writeClient
+  const { error, data } = await writeClient
     .from(TABLE)
     .delete()
     .eq('id', id)
-    .select('id', { count: 'exact' })
+    .select('id')
   if (error) throw error
-  return (count ?? 0) > 0
+  return (data?.length ?? 0) > 0
 }
