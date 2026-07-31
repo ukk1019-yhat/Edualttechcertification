@@ -18,7 +18,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     const url = req.url || ''
-    const id = decodeURIComponent(url.split('/').pop() || '')
+    const id = decodeURIComponent((url.split('?')[0].split('/').filter(Boolean).pop() || '').toString())
 
     if (req.method === 'PUT') {
       let body = ''
@@ -35,7 +35,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           }
           const ok = await updateCertificate(id, cert)
           if (!ok) {
-            send(res, 404, { error: `Certificate not found (id="${id}", url="${url}")` })
+            send(res, 404, { error: 'Certificate not found' })
             return
           }
           send(res, 200, cert)
