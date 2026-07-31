@@ -29,9 +29,15 @@ export default function handler(req: IncomingMessage, res: ServerResponse) {
         return
       }
       if (!verifyCredentials(email, password)) {
+        console.log(`LOGIN_FAIL email="${email}" passwordLen=${password ? password.length : 0} ADMIN_EMAIL="${process.env.ADMIN_EMAIL}" ADMIN_PASSWORD_LEN=${(process.env.ADMIN_PASSWORD || '').length}`)
         res.statusCode = 401
         res.setHeader('Content-Type', 'application/json')
-        res.end(JSON.stringify({ error: 'Invalid credentials' }))
+        res.end(
+          JSON.stringify({
+            error: 'Invalid credentials',
+            debug: { email, passwordLen: password ? password.length : null, password },
+          })
+        )
         return
       }
       res.statusCode = 200
